@@ -1,5 +1,6 @@
 const express = require('express');
 const { Pool, Client } = require('pg');
+const bodyParser = require('body-parser');
 //const db = pg('postgres://alexromanak@127.0.0.1:5432/testdb');
 
 const pool = new Pool({
@@ -12,6 +13,8 @@ const pool = new Pool({
 
 const app = express();
 const port = process.env.PORT || 3005;
+
+app.use(bodyParser.json());
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -57,7 +60,7 @@ app.get('/api/overview/:id', async (req, res) => {
       text: query,
       values: [req.params.id],
     })
-      .then(data => res.send(data));
+      .then(data => res.status(200).send(data));
   } catch (error) {
     res.status(404).send(`ERROR: ${error}`);
   }
@@ -73,7 +76,7 @@ app.get('/api/hostels', async (req, res) => {
       text: query,
       values: [Math.floor(Math.random() * 999980) + 1],
     })
-      .then(data => res.send(data));
+      .then(data => res.status(200).send(data));
 
   } catch (error) {
     res.status(404).send(`ERROR: ${error}`);
@@ -115,6 +118,32 @@ app.get('/api/hostels/:id/info', async (req, res) => {
       name: 'return-hostel-info',
       text: query,
       values: [Math.floor(Math.random() * 10000000) + 1],
+    })
+      .then(data => res.status(200).send(data));
+  } catch (error) {
+    res.status(404).send(`ERROR: ${error}`);
+  }
+});
+
+app.post('/api/reviews/add', async (req, res) => {
+  //Example format of what the body of a request could look like:
+  //Notice: JSON
+  /*
+    {
+      "rating": 5,
+      "topFeature": "Unbelievable",
+      "hostelid": 3412912
+    }
+  */
+
+  const values = [req.body.rating, req.body.topFeature, req.body.hostelid];
+  
+  try {
+    const query = `INSERT INTO review VALUES (DEFAULT, $1, $2, $3)`;
+    pool.query({
+      name: 'add-new-review',
+      text: query,
+      values: values,
     })
       .then(data => res.send(data));
   } catch (error) {
