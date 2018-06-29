@@ -1,6 +1,14 @@
 const express = require('express');
-const pgp = require('pg-promise')(/*options*/);
-const db = pgp('postgres://alexromanak@127.0.0.1:5432/testdb');
+const { Pool, Client } = require('pg');
+//const db = pg('postgres://alexromanak@127.0.0.1:5432/testdb');
+
+const pool = new Pool({
+  user: 'alexromanak',
+  host: '127.0.0.1',
+  database: 'testdb',
+  password: '',
+  port: 5432,
+});
 
 const app = express();
 const port = process.env.PORT || 3005;
@@ -44,10 +52,10 @@ app.get('/api/overview/:id', async (req, res) => {
       ) 
     AS urls ON urls.id = htable.id`;
 
-    db.one({
+    pool.query({
       name: 'return-hostel-info',
       text: query,
-      values: req.params.id,
+      values: [req.params.id],
     })
       .then(data => res.send(data));
   } catch (error) {
@@ -60,10 +68,10 @@ app.get('/api/hostels', async (req, res) => {
 
     const query = `SELECT city, country FROM location WHERE ID > $1 LIMIT 20;`;
 
-    db.any({
+    pool.query({
       name: 'return-set-of-locations',
       text: query,
-      values: Math.floor(Math.random() * 999980) + 1,
+      values: [Math.floor(Math.random() * 999980) + 1],
     })
       .then(data => res.send(data));
 
@@ -103,10 +111,10 @@ app.get('/api/hostels/:id/info', async (req, res) => {
       ) 
     AS urls ON urls.id = htable.id`;
 
-    db.one({
+    pool.query({
       name: 'return-hostel-info',
       text: query,
-      values: Math.floor(Math.random() * 10000000) + 1,
+      values: [Math.floor(Math.random() * 10000000) + 1],
     })
       .then(data => res.send(data));
   } catch (error) {
