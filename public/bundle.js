@@ -841,7 +841,7 @@ eval("\nvar content = __webpack_require__(/*! !../node_modules/css-loader!../nod
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(/*! ./client/index.jsx */"./client/index.jsx");
-module.exports = __webpack_require__(/*! /Users/staceyrutherford/HackReactor/FEC/Overview/public//style.scss */"./public/style.scss");
+module.exports = __webpack_require__(/*! /Users/alexromanak/Desktop/repos/sdc/Overview/public//style.scss */"./public/style.scss");
 
 
 /***/ })

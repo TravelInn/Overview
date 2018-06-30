@@ -39,6 +39,7 @@ const getKeyword = ((rating) => {
 
 const getTopFeatureCounts = ((reviews) => {
   const topFeatureCounts = {};
+  console.log(reviews);
   reviews.forEach((review) => {
     if (topFeatureCounts[review.topFeature]) {
       topFeatureCounts[review.topFeature] += 1;
@@ -56,6 +57,7 @@ const sortTopFeatures = (topFeatures => (
 
 const generateTopFeatures = ((reviews) => {
   const topFeatureCounts = getTopFeatureCounts(reviews);
+  console.log(topFeatureCounts);
   const topFeaturesWithKeywords = topFeatureCounts.map((topFeatureCount) => {
     const feature = topFeatureCount[0];
     const count = topFeatureCount[1];

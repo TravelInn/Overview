@@ -26,3 +26,6 @@ dist/
 
 # Mongo data files
 data/
+
+# Other
+newrelic.js

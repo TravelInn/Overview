@@ -1,0 +1,21 @@
+config:
+  target: 'http://localhost:3006/api'
+  payload:
+    path: "./ids.csv"
+    fields:
+      - "id"  
+  phases:
+    # - duration: 20
+    #   arrivalRate: 50
+    #   name: 'warm'
+    - duration: 20
+      arrivalRate: 300
+      name: 'full load'
+  defaults:
+    # headers:
+      # x-my-service-auth: '987401838271002188298567'
+scenarios:
+  - flow:
+    - get:
+        url: "/overview/{{id}}"
+  
