@@ -24,8 +24,9 @@ coverage
 build/
 dist/
 
-# Mongo data files
-data/
+# Stresstest
+stresstest/ids.csv
+
 
 # Other
 newrelic.js

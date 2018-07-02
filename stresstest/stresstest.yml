@@ -8,8 +8,8 @@ config:
     # - duration: 20
     #   arrivalRate: 50
     #   name: 'warm'
-    - duration: 20
-      arrivalRate: 300
+    - duration: 30
+      arrivalRate: 400
       name: 'full load'
   defaults:
     # headers:
