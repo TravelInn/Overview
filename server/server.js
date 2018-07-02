@@ -3,6 +3,7 @@ require('newrelic');
 const express = require('express');
 const { Pool } = require('pg');
 const bodyParser = require('body-parser');
+const morgan = require('morgan');
 
 const pool = new Pool({
   user: 'alexromanak',
@@ -16,6 +17,7 @@ const app = express();
 const port = process.env.PORT || 3006;
 
 app.use(bodyParser.json());
+app.use(morgan('combined'));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
