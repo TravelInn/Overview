@@ -8,11 +8,11 @@ const bodyParser = require('body-parser');
 console.log('ENV:', process.env.NODE_ENV);
 
 const pool = new Pool({
-  user: 'alexromanak',
-  host: '127.0.0.1',
-  database: 'testdb',
-  password: '',
-  max: 100,
+  user: 'power_user',
+  host: 'ec2-54-215-129-152.us-west-1.compute.amazonaws.com',
+  database: 'travelinndb',
+  password: '1234',
+  max: 10,
   port: 5432,
 });
 
