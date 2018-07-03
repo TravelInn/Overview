@@ -3,13 +3,16 @@ require('newrelic');
 const express = require('express');
 const { Pool } = require('pg');
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
+//const morgan = require('morgan');
+
+console.log('ENV:', process.env.NODE_ENV);
 
 const pool = new Pool({
   user: 'alexromanak',
   host: '127.0.0.1',
   database: 'testdb',
   password: '',
+  max: 100,
   port: 5432,
 });
 
@@ -17,7 +20,7 @@ const app = express();
 const port = process.env.PORT || 3006;
 
 app.use(bodyParser.json());
-app.use(morgan('combined'));
+//app.use(morgan('combined'));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -75,7 +78,7 @@ const generateTopFeatures = () => {
 // app.use('/:id', express.static('public'));
 
 app.get('/api/overview/:id', async (req, res) => {
-  console.log('hit! specific hostel');
+  //console.log('hit! specific hostel');
   try {
 
     // need to add error handling for hostel id that doesn't exist
@@ -125,7 +128,7 @@ app.get('/api/overview/:id', async (req, res) => {
 });
 
 app.get('/api/hostels', async (req, res) => {
-  console.log('hit! locations');
+  //console.log('hit! locations');
   try {
 
     const query = `SELECT city, country FROM location WHERE ID > $1 LIMIT 20;`;
@@ -145,7 +148,7 @@ app.get('/api/hostels', async (req, res) => {
 });
 
 app.get('/api/overview/:id', async (req, res) => {
-  console.log('hit! specific hostel');
+  //console.log('hit! specific hostel');
   try {
 
     // for now, just returning a random hostel

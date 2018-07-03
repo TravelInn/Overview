@@ -27,6 +27,5 @@ dist/
 # Stresstest
 stresstest/ids.csv
 
-
 # Other
 newrelic.js
