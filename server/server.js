@@ -74,8 +74,8 @@ const generateTopFeatures = () => {
 ////////////////////////////////////////////////////////////////////////////////////
 // API Paths
 
-// app.use(express.static('public'));
-// app.use('/:id', express.static('public'));
+app.use(express.static('public'));
+app.use('/:id', express.static('public'));
 
 app.get('/api/overview/:id', async (req, res) => {
   //console.log('hit! specific hostel');
@@ -84,10 +84,10 @@ app.get('/api/overview/:id', async (req, res) => {
     // need to add error handling for hostel id that doesn't exist
 
     const query = `
-    SELECT htable.id, name, description, avg_rating, urls.array AS photos, totalReivews
+    SELECT htable.id, name, description, avg_rating, urls.array AS photos, totalReviews
     FROM hostel AS htable
     INNER JOIN 
-      (SELECT hostelid, AVG(rating) AS avg_rating, COUNT(rating) as totalReivews
+      (SELECT hostelid, AVG(rating) AS avg_rating, COUNT(rating) as totalReviews
       FROM review
       WHERE hostelid=$1
       GROUP BY hostelid)
@@ -116,9 +116,9 @@ app.get('/api/overview/:id', async (req, res) => {
       .then(data => {
         res.status(200).send({
           "hostel": data.rows[0],
-          "rating": data.rows[0].avg_rating,
+          "rating": Math.round(data.rows[0].avg_rating * 10) / 10,
           "keyword": getKeyword(data.rows[0].avg_rating),
-          "totalReviews": 20,
+          "totalReviews": data.rows[0].totalreviews,
           "topFeatures": generateTopFeatures(),
         })
       });
@@ -139,7 +139,7 @@ app.get('/api/hostels', async (req, res) => {
       values: [Math.floor(Math.random() * 999980) + 1],
     })
       .then(data => {
-        res.status(200).send(data.rows[0])
+        res.status(200).send(data.rows)
       });
 
   } catch (error) {
@@ -155,10 +155,10 @@ app.get('/api/overview/:id', async (req, res) => {
     // in the future, should refactor to be a random selection from hostels with locationid of input
 
     const query = `
-    SELECT htable.id, name, description, avg_rating, urls.array AS photos, totalReivews
+    SELECT htable.id, name, description, avg_rating, urls.array AS photos, totalReviews
     FROM hostel AS htable
     INNER JOIN 
-      (SELECT hostelid, AVG(rating) AS avg_rating, COUNT(rating) as totalReivews
+      (SELECT hostelid, AVG(rating) AS avg_rating, COUNT(rating) as totalReviews
       FROM review
       WHERE hostelid=$1
       GROUP BY hostelid)
@@ -187,9 +187,9 @@ app.get('/api/overview/:id', async (req, res) => {
       .then(data => {
         res.status(200).send({
           "hostel": data.rows[0],
-          "rating": data.rows[0].avg_rating,
+          "rating": Math.round(data.rows[0].avg_rating * 10) / 10,
           "keyword": getKeyword(data.rows[0].avg_rating),
-          "totalReviews": 20,
+          "totalReviews": data.rows[0].totalreviews,
           "topFeatures": generateTopFeatures(),
         })
       });
