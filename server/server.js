@@ -9,7 +9,7 @@ console.log('ENV:', process.env.NODE_ENV);
 
 const pool = new Pool({
   user: 'power_user',
-  host: 'ec2-54-215-129-152.us-west-1.compute.amazonaws.com',
+  host: 'ec2-52-52-169-187.us-west-1.compute.amazonaws.com',
   database: 'travelinndb',
   password: '1234',
   max: 10,

@@ -1,5 +1,5 @@
 config:
-  target: 'http://localhost:3006/api'
+  target: 'http://ec2-54-241-153-120.us-west-1.compute.amazonaws.com:3006/api'
   payload:
     path: "./ids.csv"
     fields:
@@ -9,7 +9,7 @@ config:
     #   arrivalRate: 50
     #   name: 'warm'
     - duration: 30
-      arrivalRate: 400
+      arrivalRate: 200
       name: 'full load'
   defaults:
     # headers:
