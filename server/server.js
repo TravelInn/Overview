@@ -16,13 +16,14 @@ const pool = new Pool({
   max: 10,
   port: 5432,
 });
+
 const redisClient = redis.createClient(6379, '18.144.20.244');
 
 redisClient.on("error", function (err) {
     console.log("Error " + err);
 });
 
-console.log(redisClient);
+const redisClient = (6379, 'ec2-52-53-226-61.us-west-1.compute.amazonaws.com')
 
 const app = express();
 const port = process.env.PORT || 3006;
@@ -89,10 +90,12 @@ app.use('/:id', express.static('public'));
 // API Paths - Refactored for Redis
 
 app.get('/api/overview/:id', async (req, res) => {
+
   const id = req.params.id;
   //console.log('hit! specific hostel', id);
   
   redisClient.get(id, (err, result) => {
+  
     if (result) {
       res.status(200).send(result);
     } else {
