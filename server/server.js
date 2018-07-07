@@ -1,8 +1,9 @@
-require('newrelic');
+//require('newrelic');
 
 const express = require('express');
 const { Pool } = require('pg');
 const bodyParser = require('body-parser');
+const redis = require('redis');
 //const morgan = require('morgan');
 
 console.log('ENV:', process.env.NODE_ENV);
@@ -15,6 +16,13 @@ const pool = new Pool({
   max: 10,
   port: 5432,
 });
+const redisClient = redis.createClient(6379, '18.144.20.244');
+
+redisClient.on("error", function (err) {
+    console.log("Error " + err);
+});
+
+console.log(redisClient);
 
 const app = express();
 const port = process.env.PORT || 3006;
@@ -72,60 +80,127 @@ const generateTopFeatures = () => {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-// API Paths
+// API Paths - Static
 
 app.use(express.static('public'));
 app.use('/:id', express.static('public'));
 
+////////////////////////////////////////////////////////////////////////////////////
+// API Paths - Refactored for Redis
+
 app.get('/api/overview/:id', async (req, res) => {
-  //console.log('hit! specific hostel');
-  try {
+  const id = req.params.id;
+  //console.log('hit! specific hostel', id);
+  
+  redisClient.get(id, (err, result) => {
+    if (result) {
+      res.status(200).send(result);
+    } else {
+      try {
 
-    // need to add error handling for hostel id that doesn't exist
+        // need to add error handling for hostel id that doesn't exist
 
-    const query = `
-    SELECT htable.id, name, description, avg_rating, urls.array AS photos, totalReviews
-    FROM hostel AS htable
-    INNER JOIN 
-      (SELECT hostelid, AVG(rating) AS avg_rating, COUNT(rating) as totalReviews
-      FROM review
-      WHERE hostelid=$1
-      GROUP BY hostelid)
-      AS rtable 
-      ON htable.id = rtable.hostelid
-      INNER JOIN
-        (SELECT $1 AS id, 
-        ARRAY
-          (SELECT url
-          FROM 
-            (SELECT UNNEST(photosarrayids)
-            FROM hostel
-            WHERE id = $1)
-            AS photoidtable
-            INNER JOIN
-              photos
-              ON photoidtable.unnest = photos.id)
-      ) 
-    AS urls ON urls.id = htable.id`;
+        const query = `
+        SELECT htable.id, name, description, avg_rating, urls.array AS photos, totalReviews
+        FROM hostel AS htable
+        INNER JOIN 
+          (SELECT hostelid, AVG(rating) AS avg_rating, COUNT(rating) as totalReviews
+          FROM review
+          WHERE hostelid=$1
+          GROUP BY hostelid)
+          AS rtable 
+          ON htable.id = rtable.hostelid
+          INNER JOIN
+            (SELECT $1 AS id, 
+            ARRAY
+              (SELECT url
+              FROM 
+                (SELECT UNNEST(photosarrayids)
+                FROM hostel
+                WHERE id = $1)
+                AS photoidtable
+                INNER JOIN
+                  photos
+                  ON photoidtable.unnest = photos.id)
+          ) 
+        AS urls ON urls.id = htable.id`;
 
-    pool.query({
-      name: 'return-hostel-info',
-      text: query,
-      values: [req.params.id],
-    })
-      .then(data => {
-        res.status(200).send({
-          "hostel": data.rows[0],
-          "rating": Math.round(data.rows[0].avg_rating * 10) / 10,
-          "keyword": getKeyword(data.rows[0].avg_rating),
-          "totalReviews": data.rows[0].totalreviews,
-          "topFeatures": generateTopFeatures(),
+        pool.query({
+          name: 'return-hostel-info',
+          text: query,
+          values: [req.params.id],
         })
-      });
-  } catch (error) {
-    res.status(404).send(`ERROR: ${error}`);3
-  }
+          .then(data => {
+            const hostelInfo = {
+              "hostel": data.rows[0],
+              "rating": Math.round(data.rows[0].avg_rating * 10) / 10,
+              "keyword": getKeyword(data.rows[0].avg_rating),
+              "totalReviews": data.rows[0].totalreviews,
+              "topFeatures": generateTopFeatures(),
+            };
+            res.status(200).send(hostelInfo);
+            redisClient.setex(id, 3600, JSON.stringify(hostelInfo));
+          });
+      } catch (error) {
+        res.status(404).send(`ERROR: ${error}`);
+      }
+    }
+  });
 });
+
+////////////////////////////////////////////////////////////////////////////////////
+// API Paths - NOT Redis-compatible
+
+//commenting out in favor of redis-compatible version
+// app.get('/api/overview/:id', async (req, res) => {
+//   //console.log('hit! specific hostel');
+//   try {
+
+//     // need to add error handling for hostel id that doesn't exist
+
+//     const query = `
+//     SELECT htable.id, name, description, avg_rating, urls.array AS photos, totalReviews
+//     FROM hostel AS htable
+//     INNER JOIN 
+//       (SELECT hostelid, AVG(rating) AS avg_rating, COUNT(rating) as totalReviews
+//       FROM review
+//       WHERE hostelid=$1
+//       GROUP BY hostelid)
+//       AS rtable 
+//       ON htable.id = rtable.hostelid
+//       INNER JOIN
+//         (SELECT $1 AS id, 
+//         ARRAY
+//           (SELECT url
+//           FROM 
+//             (SELECT UNNEST(photosarrayids)
+//             FROM hostel
+//             WHERE id = $1)
+//             AS photoidtable
+//             INNER JOIN
+//               photos
+//               ON photoidtable.unnest = photos.id)
+//       ) 
+//     AS urls ON urls.id = htable.id`;
+
+//     pool.query({
+//       name: 'return-hostel-info',
+//       text: query,
+//       values: [req.params.id],
+//     })
+//       .then(data => {
+//         res.status(200).send({
+//           "hostel": data.rows[0],
+//           "rating": Math.round(data.rows[0].avg_rating * 10) / 10,
+//           "keyword": getKeyword(data.rows[0].avg_rating),
+//           "totalReviews": data.rows[0].totalreviews,
+//           "topFeatures": generateTopFeatures(),
+//         })
+//       });
+//   } catch (error) {
+//     res.status(404).send(`ERROR: ${error}`);3
+//   }
+// });
 
 app.get('/api/hostels', async (req, res) => {
   //console.log('hit! locations');
