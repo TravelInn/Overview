@@ -17,13 +17,11 @@ const pool = new Pool({
   port: 5432,
 });
 
-const redisClient = redis.createClient(6379, '18.144.20.244');
+const redisClient = redis.createClient(6379, 'ec2-54-219-176-252.us-west-1.compute.amazonaws.com');
 
 redisClient.on("error", function (err) {
     console.log("Error " + err);
 });
-
-const redisClient = (6379, 'ec2-52-53-226-61.us-west-1.compute.amazonaws.com')
 
 const app = express();
 const port = process.env.PORT || 3006;
